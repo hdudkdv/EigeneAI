@@ -1,0 +1,19 @@
+[Unit]
+Description=EigeneAI llama.cpp HIP Server (ROCm 6.3.3 / gfx906)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+EnvironmentFile=-/etc/eigeneai/eigeneai.env
+Environment=HSA_OVERRIDE_GFX_VERSION=9.0.6
+ExecStart=/bin/bash -c 'exec ${LLAMA_CPP_BIN} --host ${LLAMA_CPP_HOST} --port ${LLAMA_CPP_PORT} -m ${LLAMA_CPP_MODEL} -c ${LLAMA_CPP_CTX} -ngl ${LLAMA_CPP_GPU_LAYERS} --alias ${DEFAULT_MODEL}'
+Restart=on-failure
+RestartSec=5
+User=eigeneai
+Group=eigeneai
+# Inference only on localhost — never expose publicly
+# Soft-reserve: GPU_COUNT>1 later via extra instances / TP spike
+
+[Install]
+WantedBy=multi-user.target

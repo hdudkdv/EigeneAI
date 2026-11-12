@@ -1,0 +1,12 @@
+[Unit]
+Description=EigeneAI First-Boot Wizard
+After=network-online.target eigeneai-gateway.service
+ConditionPathExists=!/var/lib/ai/gateway/.firstboot-done
+
+[Service]
+Type=oneshot
+ExecStart=/opt/eigeneai/appliance/first-boot/wizard.sh
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target

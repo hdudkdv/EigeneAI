@@ -1,0 +1,57 @@
+name: CI
+
+on:
+  push:
+    branches: [main, "cursor/**"]
+  pull_request:
+
+jobs:
+  gateway-smoke:
+    runs-on: ubuntu-22.04
+    defaults:
+      run:
+        working-directory: gateway
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install gateway
+        run: |
+          python -m pip install -U pip
+          pip install -e ".[dev]"
+      - name: Smoke tests (MOCK_INFERENCE)
+        env:
+          MOCK_INFERENCE: "1"
+          EIGENEAI_ADMIN_SECRET: test-admin-secret
+        run: pytest -q
+
+  web-build:
+    runs-on: ubuntu-22.04
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Install & build PWA
+        run: |
+          npm install
+          npm run build
+      - name: Check dist
+        run: test -f dist/index.html
+
+  appliance-scripts:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Shellcheck-ish syntax
+        run: |
+          bash -n appliance/scripts/*.sh
+          bash -n appliance/first-boot/wizard.sh
+          test -f appliance/ROCM-PIN.md
+          test -f appliance/systemd/eigeneai-gateway.service
+          grep -q '6.3.3' appliance/ROCM-PIN.md
+          grep -q 'gfx906' appliance/ROCM-PIN.md

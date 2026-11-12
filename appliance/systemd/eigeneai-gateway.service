@@ -1,0 +1,19 @@
+[Unit]
+Description=EigeneAI OpenAI-kompatibles Gateway
+After=network-online.target eigeneai-llama.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+EnvironmentFile=-/etc/eigeneai/eigeneai.env
+WorkingDirectory=/opt/eigeneai/app/gateway
+ExecStart=/opt/eigeneai/venv/bin/python -m app
+Restart=on-failure
+RestartSec=3
+User=eigeneai
+Group=eigeneai
+# Gateway binds localhost; nginx terminates TLS for LAN
+NoNewPrivileges=true
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,22 @@
+#cloud-config
+# Beispiel für Ubuntu 22.04 Autoinstall (anpassen vor Nutzung).
+autoinstall:
+  version: 1
+  identity:
+    hostname: eigeneai
+    username: eigeneai
+    # password hash erzeugen: openssl passwd -6
+    password: "CHANGEME_HASH"
+  keyboard:
+    layout: de
+  locale: de_DE.UTF-8
+  ssh:
+    install-server: true
+  storage:
+    layout:
+      name: lvm
+  late-commands:
+    - curtin in-target -- mkdir -p /opt/eigeneai-src
+    # Repo/Tarball hierhin kopieren (PXE/HTTP) und Install-Skripte anstoßen:
+    # - curtin in-target -- /opt/eigeneai-src/appliance/scripts/install-rocm-6.3.3.sh
+    - echo "EigeneAI late-commands: ROCm/Gateway nach erstem Boot manuell oder per Ansible nachziehen" > /target/root/EIGENEAI-NEXT.txt
